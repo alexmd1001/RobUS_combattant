@@ -11,21 +11,10 @@ void tourner(double angle, uint8_t moteur);
 double distance_to_pulses(double distance);
 void renverserQuille();
 void avancer();
-void pid_gauche ();
-void pid_droit ();
 
 int valSuiveurLigne[8];
-
 bool son = false;
 bool tuer_quille = false;
-
-float nb_pulses_tot;
-const int clics_optimal = 240;
-const float vitesse_pointe = 0.25;
-const float kp = 0.0001;
-
-float v0_consigne=0.25;
-float v1_consigne=0.25;
 
 void setup() {
   // put your setup code here, to run once:
@@ -43,11 +32,10 @@ void setup() {
   pinMode(49, OUTPUT); //rouge
   pinMode(53, OUTPUT); //vert
 
-  digitalWrite(47, LOW);
-  digitalWrite(48, LOW);
-  digitalWrite(49,LOW);
+  digitalWrite(47, HIGH);
+  digitalWrite(48, HIGH);
+  digitalWrite(49,HIGH);
   digitalWrite(53,HIGH);
-
 
   delay(1000);
 
@@ -77,6 +65,7 @@ void loop() {
     digitalWrite(49,LOW);
     renverserQuille();
   }
+
 
 }
 
@@ -131,7 +120,6 @@ double convertAnalog(double valeurBrute){
   int lectureIR0 = analogRead(A0);
   double voltageIR0 = convertAnalog(lectureIR0);
   if(voltageIR0 > 1.2 ){ //environ 25cm
-
     Serial.println("Doit s'arreter!!!!! <25cm ");
     //arreter();
   }
@@ -159,6 +147,7 @@ double distance_to_pulses(double distance)
   double pulses = (distance*3200.0)/23.938936;
   return pulses;
 }
+
 void renverserQuille(){
   Serial.println(getRangeSonar());
     if (getRangeSonar()< 20.0){
@@ -173,25 +162,6 @@ void renverserQuille(){
 }
 
 void avancer(){
-  MOTOR_SetSpeed(LEFT, v0_consigne);
-  MOTOR_SetSpeed(RIGHT, v1_consigne);
-  pid_gauche();
-  pid_droit();
+  MOTOR_SetSpeed(LEFT,0.25);
+  MOTOR_SetSpeed(RIGHT, 0.25);
  }
-
- void pid_gauche ()
-{
-  ENCODER_Reset(LEFT);
-  delay(100);
-  int clics_gauche = ENCODER_Read(LEFT);
-  float valeur_erreur = (clics_optimal-clics_gauche);
-  v0_consigne += (valeur_erreur * kp);
-}
-void pid_droit ()
-{
-  ENCODER_Reset(RIGHT);
-  delay(100);
-  int clics_droit = ENCODER_Read(RIGHT);
-  int valeur_erreur = (clics_optimal-clics_droit);
-  v1_consigne += (valeur_erreur * kp);
-}
