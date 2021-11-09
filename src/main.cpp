@@ -13,11 +13,12 @@ void renverserQuille();
 void avancer();
 void suiveurLigne2();
 void retourner_ligne();
-void tourner2roues();
+void tourner2roues(int Motor_avant, int Motor_arriere);
 
 int valSuiveurLigne[8];
 bool son = false;
 bool tuer_quille = false;
+bool chemin = false;
 #define KP 0.001
 #define KI 0.000001
 
@@ -52,13 +53,15 @@ void loop() {
   {
     valSuiveurLigne[i-37] = digitalRead(i);
   }
-  for (int i = 0; i < 8; i++)
+  /*for (int i = 0; i < 8; i++)
   {
-    //Serial.print(valSuiveurLigne[i]);
+    Serial.print(valSuiveurLigne[i]);
   }
- // Serial.println();
+  Serial.println();*/
+  
+
   //Serial.println(analogRead(A11));
-  suiveurLigne();
+   suiveurLigne();
 
   if (analogRead(A11)>500){
     son = true;
@@ -155,19 +158,19 @@ double distance_to_pulses(double distance)
   return pulses;
 }
 
-void tourner2roues()
+void tourner2roues(int Motor_avant, int Motor_arriere)
 {
-   double distance = (35.0*119.380521)/360.0;
+   double distance = (40.0*119.380521)/360.0;
    ENCODER_Reset(LEFT);
    ENCODER_Reset(RIGHT);
    double pulses_voulus = distance_to_pulses(distance);
    int nb_pulses_tot = 0;
-   MOTOR_SetSpeed(LEFT, 0.3);
-   MOTOR_SetSpeed(RIGHT,-0.3);
+   MOTOR_SetSpeed(Motor_avant, 0.3);
+   MOTOR_SetSpeed(Motor_arriere,-0.3);
 
    while(nb_pulses_tot < pulses_voulus){
       delay(50);
-      nb_pulses_tot += ENCODER_ReadReset(LEFT);
+      nb_pulses_tot += ENCODER_ReadReset(Motor_avant);
    }
    arreter();
 }
@@ -229,18 +232,18 @@ void retourner_ligne()
   {
     valSuiveurLigne[i-37] = digitalRead(i);
   }
-  for (int i = 0; i < 8; i++)
+ /* for (int i = 0; i < 8; i++)
   {
     Serial.print(valSuiveurLigne[i]);
   }
-  Serial.println();
+  Serial.println();*/
   
    //if (valSuiveurLigne[0]==0 || valSuiveurLigne[1]==0 || valSuiveurLigne[2]==0 || valSuiveurLigne[3]==0 || valSuiveurLigne[4]==0 || valSuiveurLigne[5]==0 || valSuiveurLigne[6]==0 || valSuiveurLigne[7]==0)
    if (valSuiveurLigne[3]==0 && valSuiveurLigne[4] == 0)
    {
 
       arreter();
-      tourner2roues();
+      tourner2roues(LEFT, RIGHT);
    }
    else
    {
@@ -250,12 +253,24 @@ void retourner_ligne()
    }
 }
 
+
 void suiveurLigne2() {
-  
+  chemin = true;
+  Serial.println("suiv2");
+  while(chemin){
+      
+   int valSuiveurLigne[8];
+  for (int i = 37; i <= 44; i++)
+  {
+    valSuiveurLigne[i-37] = digitalRead(i);
+  }
+     Serial.println("dans chemin");
    if(valSuiveurLigne[0] == 0 && valSuiveurLigne[1] == 0 && valSuiveurLigne[2] == 0 && valSuiveurLigne[3] == 0){
+     delay(250);
      arreter();
-     delay(1000);
-     tourner2roues();
+     delay(500);
+     tourner2roues(RIGHT, LEFT);
+     chemin = false;
    }
   else if (valSuiveurLigne[3] == 0 && valSuiveurLigne[4] == 0 )
   {
@@ -272,13 +287,21 @@ void suiveurLigne2() {
     MOTOR_SetSpeed(LEFT, 0.2);
   }
   else if(valSuiveurLigne[0] == 1 && valSuiveurLigne[1] ==1 && valSuiveurLigne[2] ==1 && valSuiveurLigne[3] ==1 && valSuiveurLigne[4] ==1 && valSuiveurLigne[5] ==1 && valSuiveurLigne[6]==1 && valSuiveurLigne[7]==1 ){
-     MOTOR_SetSpeed(LEFT, 0.2);
+     MOTOR_SetSpeed(LEFT, 0);
+     MOTOR_SetSpeed(RIGHT, 0);
   }
   else if(valSuiveurLigne[0] == 0 && valSuiveurLigne[1] == 0 && valSuiveurLigne[2] == 0 && valSuiveurLigne[3] == 0 ){
     arreter();
     delay(1000);
     tourner(45, RIGHT);
     tourner(45, RIGHT);
+
   }
+  else{
+     MOTOR_SetSpeed(LEFT,0.2);
+     MOTOR_SetSpeed(RIGHT, 0.2);
+  }
+ 
   delayMicroseconds(50);
+  }
   }
