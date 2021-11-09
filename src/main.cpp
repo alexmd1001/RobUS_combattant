@@ -13,6 +13,7 @@ void renverserQuille();
 void avancer();
 void suiveurLigne2();
 void retourner_ligne();
+void tourner2roues();
 
 int valSuiveurLigne[8];
 bool son = false;
@@ -60,7 +61,6 @@ void loop() {
   suiveurLigne();
 
   if (analogRead(A11)>500){
-    digitalWrite(53, LOW);
     son = true;
   }
   if (son == true){
@@ -140,7 +140,7 @@ void tourner(double angle, uint8_t moteur){
   ENCODER_Reset(RIGHT);
   double pulses_voulus = distance_to_pulses(distance);
   int nb_pulses_tot = 0;
-  MOTOR_SetSpeed(moteur, 0.3);
+   MOTOR_SetSpeed(moteur, 0.3);
 
   while(nb_pulses_tot < pulses_voulus){
     delay(50);
@@ -155,19 +155,41 @@ double distance_to_pulses(double distance)
   return pulses;
 }
 
+void tourner2roues()
+{
+   double distance = (35.0*119.380521)/360.0;
+   ENCODER_Reset(LEFT);
+   ENCODER_Reset(RIGHT);
+   double pulses_voulus = distance_to_pulses(distance);
+   int nb_pulses_tot = 0;
+   MOTOR_SetSpeed(LEFT, 0.3);
+   MOTOR_SetSpeed(RIGHT,-0.3);
+
+   while(nb_pulses_tot < pulses_voulus){
+      delay(50);
+      nb_pulses_tot += ENCODER_ReadReset(LEFT);
+   }
+   arreter();
+}
+
 void renverserQuille(){
   Serial.println(getRangeSonar());
     if (getRangeSonar()< 40.0){
+      digitalWrite(53, LOW);
       tuer_quille=true;
     }
     if (tuer_quille==true){
       tourner(45, LEFT);
-      tourner(40, LEFT);
+      tourner(45, LEFT);
       tuer_quille = false;
       son = false;
+      digitalWrite(47, HIGH);
+    digitalWrite(48, HIGH);
+    digitalWrite(49,HIGH);
       avancer();
       delay(2000);
       retourner_ligne();
+      digitalWrite(53,HIGH);
       suiveurLigne2();
     }
 }
@@ -218,8 +240,7 @@ void retourner_ligne()
    {
 
       arreter();
-      tourner(45, LEFT);
-      tourner(40,LEFT);
+      tourner2roues();
    }
    else
    {
@@ -230,13 +251,16 @@ void retourner_ligne()
 }
 
 void suiveurLigne2() {
-  MOTOR_SetSpeed(LEFT,0.2);
-  MOTOR_SetSpeed(RIGHT,0.2);
-
-  if (valSuiveurLigne[3] == 0 && valSuiveurLigne[4] == 0 )
+  
+   if(valSuiveurLigne[0] == 0 && valSuiveurLigne[1] == 0 && valSuiveurLigne[2] == 0 && valSuiveurLigne[3] == 0){
+     arreter();
+     delay(1000);
+     tourner2roues();
+   }
+  else if (valSuiveurLigne[3] == 0 && valSuiveurLigne[4] == 0 )
   {
-    MOTOR_SetSpeed(RIGHT,0.2);
-    MOTOR_SetSpeed(LEFT,0.2);
+     MOTOR_SetSpeed(RIGHT,0.2);
+     MOTOR_SetSpeed(LEFT,0.2);
   }
   
   else if(valSuiveurLigne[0] == 0 || valSuiveurLigne[1] == 0 || valSuiveurLigne[2] == 0 ) {
@@ -252,6 +276,7 @@ void suiveurLigne2() {
   }
   else if(valSuiveurLigne[0] == 0 && valSuiveurLigne[1] == 0 && valSuiveurLigne[2] == 0 && valSuiveurLigne[3] == 0 ){
     arreter();
+    delay(1000);
     tourner(45, RIGHT);
     tourner(45, RIGHT);
   }
