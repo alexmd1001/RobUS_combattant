@@ -13,6 +13,7 @@ double distance_to_pulses(double distance);
 void renverserQuille();
 void avancer();
 void suiveurLigne2();
+void retourner_ligne();
 
 int valSuiveurLigne[8];
 bool son = false;
@@ -163,9 +164,10 @@ void renverserQuille(){
     if (tuer_quille==true){
       tourner(45, LEFT);
       tourner(40, LEFT);
-      avancer();
       tuer_quille = false;
       son = false;
+      retourner_ligne();
+
     }
 }
 
@@ -198,26 +200,10 @@ void avancer(){
 
 void retourner_ligne()
 {
-   int suiveur[8];
-for (int i = 0; i <8; i++)
-{
    
-   Serial.println(i+37);
-   suiveur[i]=digitalRead(i+37);
-
-}
-   for (int i = 0; i <8; i++)
+   if (valSuiveurLigne[0]==0 || valSuiveurLigne[1]==0 || valSuiveurLigne[2]==0 || valSuiveurLigne[3]==0 || valSuiveurLigne[4]==0 || valSuiveurLigne[5]==0 || valSuiveurLigne[6]==0 || valSuiveurLigne[7]==0) 
    {
-      Serial.print(suiveur[i]);
-      
-
-   }
-
-   Serial.println();
-   
-   
-   if (suiveur[0]==0 || suiveur[1]==0 || suiveur[2]==0 || suiveur[3]==0 || suiveur[4]==0 || suiveur[5]==0 || suiveur[6]==0 || suiveur[7]==0) 
-   {
+      arreter();
       tourner(45, LEFT);
       tourner(40,LEFT);
       suiveurLigne2();
