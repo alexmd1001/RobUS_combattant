@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <LibRobus.h>
-#include <arduino-timer.h>
 
 void suiveurLigne();
 void arreter();
@@ -166,7 +165,8 @@ void renverserQuille(){
       tourner(40, LEFT);
       tuer_quille = false;
       son = false;
-      delay(1000);
+      avancer();
+      delay(2000);
       retourner_ligne();
       suiveurLigne2();
     }
@@ -176,7 +176,7 @@ void avancer(){
   int16_t erreur = 0;
 	int32_t sommeErreur = 0;
 	//uint32_t moyenneEnco = 0;
-	float consigneVitesse = 0.05;
+	float consigneVitesse = 0.2;
 	//uint32_t pourcPulse = 0;
 
   ENCODER_Reset(LEFT);
@@ -201,9 +201,22 @@ void avancer(){
 
 void retourner_ligne()
 {
-   
-   if (valSuiveurLigne[0]==0 || valSuiveurLigne[1]==0 || valSuiveurLigne[2]==0 || valSuiveurLigne[3]==0 || valSuiveurLigne[4]==0 || valSuiveurLigne[5]==0 || valSuiveurLigne[6]==0 || valSuiveurLigne[7]==0) 
+   Serial.println("retour");
+   int valSuiveurLigne[8];
+  for (int i = 37; i <= 44; i++)
+  {
+    valSuiveurLigne[i-37] = digitalRead(i);
+  }
+  for (int i = 0; i < 8; i++)
+  {
+    Serial.print(valSuiveurLigne[i]);
+  }
+  Serial.println();
+  
+   //if (valSuiveurLigne[0]==0 || valSuiveurLigne[1]==0 || valSuiveurLigne[2]==0 || valSuiveurLigne[3]==0 || valSuiveurLigne[4]==0 || valSuiveurLigne[5]==0 || valSuiveurLigne[6]==0 || valSuiveurLigne[7]==0)
+   if (valSuiveurLigne[3]==0 && valSuiveurLigne[4] == 0)
    {
+
       arreter();
       tourner(45, LEFT);
       tourner(40,LEFT);
@@ -211,7 +224,7 @@ void retourner_ligne()
    else
    {
       avancer();
-      delay(100);
+      delay(10);
       retourner_ligne();
    }
 }
@@ -237,7 +250,8 @@ void suiveurLigne2() {
   else if(valSuiveurLigne[0] == 1 && valSuiveurLigne[1] ==1 && valSuiveurLigne[2] ==1 && valSuiveurLigne[3] ==1 && valSuiveurLigne[4] ==1 && valSuiveurLigne[5] ==1 && valSuiveurLigne[6]==1 && valSuiveurLigne[7]==1 ){
      MOTOR_SetSpeed(LEFT, 0.2);
   }
-  else if(valSuiveurLigne[0] == 0 && valSuiveurLigne[1] == 0 && valSuiveurLigne[2] == 0 && valSuiveurLigne[3] == 0 && valSuiveurLigne[4] == 0){
+  else if(valSuiveurLigne[0] == 0 && valSuiveurLigne[1] == 0 && valSuiveurLigne[2] == 0 && valSuiveurLigne[3] == 0 ){
+    arreter();
     tourner(45, RIGHT);
     tourner(45, RIGHT);
   }
