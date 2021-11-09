@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <LibRobus.h>
+#include <arduino-timer.h>
 
 void suiveurLigne();
 void arreter();
@@ -15,6 +16,8 @@ void avancer();
 int valSuiveurLigne[8];
 bool son = false;
 bool tuer_quille = false;
+#define KP 0.001
+#define KI 0.000001
 
 void setup() {
   // put your setup code here, to run once:
@@ -70,6 +73,9 @@ void loop() {
 }
 
 void suiveurLigne() {
+  MOTOR_SetSpeed(LEFT,0.2);
+  MOTOR_SetSpeed(RIGHT,0.2);
+
   if (valSuiveurLigne[3] == 0 && valSuiveurLigne[4] == 0 )
   {
     MOTOR_SetSpeed(RIGHT,0.2);
@@ -103,7 +109,7 @@ void suiveurLigne() {
 
 double getRangeSonar(){
   digitalWrite(46, LOW);    // Set the trigger pin to low for 2uS
-  delay(100);
+  delay(10);
   digitalWrite(46, HIGH);   // Send a 10uS high to trigger ranging
   delayMicroseconds(10);
   digitalWrite(46, LOW);    // Send pin low again
@@ -150,7 +156,7 @@ double distance_to_pulses(double distance)
 
 void renverserQuille(){
   Serial.println(getRangeSonar());
-    if (getRangeSonar()< 20.0){
+    if (getRangeSonar()< 40.0){
       tuer_quille=true;
     }
     if (tuer_quille==true){
@@ -158,10 +164,33 @@ void renverserQuille(){
       tourner(40, LEFT);
       avancer();
       tuer_quille = false;
+      son = false;
     }
 }
 
 void avancer(){
-  MOTOR_SetSpeed(LEFT,0.25);
-  MOTOR_SetSpeed(RIGHT, 0.25);
+  int16_t erreur = 0;
+	int32_t sommeErreur = 0;
+	//uint32_t moyenneEnco = 0;
+	float consigneVitesse = 0.05;
+	//uint32_t pourcPulse = 0;
+
+  ENCODER_Reset(LEFT);
+  ENCODER_Reset(RIGHT);
+
+	MOTOR_SetSpeed(LEFT, consigneVitesse);
+	MOTOR_SetSpeed(RIGHT, consigneVitesse);
+	
+		//lecture des encos
+		int32_t encoGauche = ENCODER_Read(LEFT);
+		int32_t encoDroite = ENCODER_Read(RIGHT);
+
+		erreur = encoDroite - encoGauche;
+		sommeErreur += erreur;
+		float ajustement = erreur * KP + sommeErreur * KI;
+		float consigneVitesseAdj = consigneVitesse + ajustement;
+		MOTOR_SetSpeed(LEFT,consigneVitesseAdj);
+		MOTOR_SetSpeed(RIGHT,consigneVitesse);
+	  moyenneEnco = (ENCODER_Read(LEFT)+ENCODER_Read(RIGHT))/2;
+
  }
