@@ -166,8 +166,9 @@ void renverserQuille(){
       tourner(40, LEFT);
       tuer_quille = false;
       son = false;
+      delay(1000);
       retourner_ligne();
-
+      suiveurLigne2();
     }
 }
 
@@ -206,11 +207,12 @@ void retourner_ligne()
       arreter();
       tourner(45, LEFT);
       tourner(40,LEFT);
-      suiveurLigne2();
    }
    else
    {
       avancer();
+      delay(100);
+      retourner_ligne();
    }
 }
 
